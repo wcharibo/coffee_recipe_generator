@@ -1,6 +1,9 @@
-get_token.py
+#ignore my secret keys
+/get_token.py
 
 #ignore mp3, wav files
 *.mp3
 *.wav
 
+#ignore ipynb checkpoints
+.ipynb_checkpoints
