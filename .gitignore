@@ -10,3 +10,7 @@
 
 #ignore python chache
 __pycache__
+
+#ignore txt file to train
+*.txt
+
