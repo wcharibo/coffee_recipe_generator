@@ -1,8 +1,10 @@
 # coffee_recipe_generator
-====================
+
+
 ## Training Environment
 
 * Training Data
+  
 |Data   | Textline |
 |-------|----------|
 |Youtube| 1K       |
@@ -15,9 +17,13 @@
 
 * Clone this repository
 
-    git clone https://github.com/wcharibo/coffee_recipe_generator.git
-    cd coffee_recipe_generator
-    pip install -r requirements.txt
+```
+
+git clone https://github.com/wcharibo/coffee_recipe_generator.git
+cd coffee_recipe_generator
+pip install -r requirements.txt
+
+```
 
 Add this code to project directory and Write file name like 'get_token.py'
 
@@ -39,7 +45,7 @@ this project used RTZR(returnzero) stt api to extract text from youtube video.
 so you need to get an api key and write at above 'YOUR_CLIENT_ID', 'YOUR_SECRET_CODE'.
 
 
-##How to use
+## How to use
 
 ### Using with python3.10
 
