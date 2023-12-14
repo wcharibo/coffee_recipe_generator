@@ -14,3 +14,6 @@ __pycache__
 #ignore txt file to train
 *.txt
 
+#ignore trained model file
+*.tar
+*.pt

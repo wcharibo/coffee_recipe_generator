@@ -2,6 +2,7 @@ from pytube import YouTube
 import sys
 import os
 import text_extraction
+from predictResult import *
 from pydub import AudioSegment
 import fnmatch
 
@@ -57,22 +58,11 @@ def save_text_to_file(text_list, base_filename="test"):
     return filename
 
 if __name__ =="__main__":
-    directory = "/home/woong/coffee_recipe_generator/"
-    pattern = "output_*.mp3"
+    if len(sys.argv) !=2:
+        print("Usage: python main.py <youtube_link or file_path>")
+        sys.exit(1)
+    youtube_link = sys.argv[1]
+    text = get_yt_text(youtube_link)
+    result_filename = save_text_to_file(text)
 
-    matching_files = find_files(directory, pattern)
-
-    if matching_files:
-        for file in matching_files:
-            text = get_yt_text(file)
-            result_filename = save_text_to_file(text)
-    else:
-        if len(sys.argv) !=2:
-            print("Usage: python main.py <youtube_link or file_path>")
-            sys.exit(1)
-        youtube_link = sys.argv[1]
-        text = get_yt_text(youtube_link)
-        result_filename = save_text_to_file(text)
-
-    print("result:")
-    print(text)
+    predict(result_filename)
