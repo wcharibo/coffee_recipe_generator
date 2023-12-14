@@ -20,7 +20,7 @@ Add this code to project directory and Write file name like 'get_token.py'
         resp.raise_for_status()
         return resp.json()['access_token']
 
-this project used RTZR(returnzero) stt api to extract text from youtube video.
+this project used RTZR(returnzero) stt api to extract text from youtube video.   
 so you need to get an api key and write at above 'YOUR_CLIENT_ID', 'YOUR_SECRET_CODE'.
 
 
