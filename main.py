@@ -65,4 +65,6 @@ if __name__ =="__main__":
     text = get_yt_text(youtube_link)
     result_filename = save_text_to_file(text)
 
-    predict(result_filename)
+    best_model = get_train_result()
+
+    predict(result_filename,best_model)
