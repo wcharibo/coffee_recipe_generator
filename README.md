@@ -11,7 +11,7 @@
 
 ## Requirements
 
-*see [requirements.txt](https://github.com/wcharibo/coffee_recipe_generator/blob/main/requirements.txt)
+* see [requirements.txt](https://github.com/wcharibo/coffee_recipe_generator/blob/main/requirements.txt)
 
 ## How to install
 

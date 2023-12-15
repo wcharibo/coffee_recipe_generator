@@ -321,7 +321,7 @@ def predict(file_path, best_model):
                 print(sentence)
                 result_recipe.append(sentence)
 
-    result_file_path = './result/' + file_path
+    result_file_path = './result_' + file_path
 
     with open(result_file_path, 'w', encoding='utf-8') as result_file:
         for i, line in enumerate(result_recipe):
