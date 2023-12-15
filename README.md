@@ -51,7 +51,8 @@ so you need to get an api key and write at above 'YOUR_CLIENT_ID', 'YOUR_SECRET_
 
     python3 main.py <Youtube URL>
 
-you have to train model with development.ipynb before run this code
+If trained model is not in your directroy, training will be automatically started.
+But it can be taken few minutes.
 
 ## License
 this project is published under Apache-2.0 license.
