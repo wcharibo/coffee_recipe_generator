@@ -9,6 +9,13 @@ import numpy as np
 from tqdm import tqdm, tqdm_notebook
 from kobert_tokenizer import KoBERTTokenizer
 from transformers import BertModel
+from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+import os
+import pandas as pd
+from fnmatch import fnmatch
+import train
 
 from transformers import AdamW
 from transformers.optimization import get_cosine_schedule_with_warmup
@@ -182,7 +189,7 @@ class BERTClassifier(nn.Module):
     def __init__(self,
                  bert,
                  hidden_size = 768,
-                 num_classes=7,
+                 num_classes=2,
                  dr_rate=None,
                  params=None):
         super(BERTClassifier, self).__init__()
@@ -207,22 +214,76 @@ class BERTClassifier(nn.Module):
             out = self.dropout(pooler)
         return self.classifier(out)
 
-model = BERTClassifier(bertmodel,  dr_rate=0.5).to(device)
-no_decay = ['bias', 'LayerNorm.weight']
-optimizer_grouped_parameters = [
-    {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
-    {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
-]
-optimizer = AdamW(optimizer_grouped_parameters, lr=learning_rate)
-loss_fn = nn.CrossEntropyLoss()
+def get_train_result():
+    df = pd.read_csv("output_without_quotes.csv", quoting=1)
 
-model.load_state_dict(torch.load(PATH + 'model_state.pt'))  # state_dict를 불러 온 후, 모델에 저장
+    data_list = []
+    for q, label in zip(df['Sentence'], df['Label'])  :
+        data = []
+        data.append(q)
+        data.append(str(label))
+        data_list.append(data)
 
-checkpoint = torch.load(PATH + 'all.tar')   # dict 불러오기
-model.load_state_dict(checkpoint['model'])
-optimizer.load_state_dict(checkpoint['optimizer'])
+    #train test split
+    dataset_train, dataset_test = train_test_split(data_list, test_size=0.2, random_state=0)
 
-def predict(file_path):
+    # 테스트 데이터 로더
+    data_test = BERTDataset(dataset_test, 0, 1, tokenizer, vocab, max_len, True, False)
+    test_dataloader = torch.utils.data.DataLoader(data_test, batch_size=batch_size, num_workers=5)
+
+    PATH = './'
+    pattern = 'checkpoint_fold*.pt'
+
+    file_list = os.listdir(PATH)
+
+    match_files = [file for file in file_list if fnmatch(file, pattern)]
+
+    if match_files:
+        for file in match_files:
+            print('already trained')
+    else:
+        train.train_model()
+
+    best_acc = 0
+    best_model = 0
+    for i in range(5):
+        model = BERTClassifier(bertmodel,  dr_rate=0.5).to(device)
+        model.load_state_dict(torch.load(PATH + f'model_state_fold{i}.pt'))
+        model.eval()
+
+        all_preds = []
+        all_labels = []
+
+
+        for batch_id, (token_ids, valid_length, segment_ids, label) in enumerate(tqdm(test_dataloader)):
+            token_ids = token_ids.long().to(device)
+            segment_ids = segment_ids.long().to(device)
+            valid_length= valid_length
+            label = label.long().to(device)
+
+            # 모델 예측
+            out = model(token_ids, valid_length, segment_ids)
+            _, preds = torch.max(out, 1)
+
+            all_preds.extend(preds.cpu().numpy())
+            all_labels.extend(label.cpu().numpy())
+
+        # recall, f1-score 계산
+        precision, recall, f1, _ = precision_recall_fscore_support(all_labels, all_preds, average='weighted', zero_division=1)
+        accuracy = accuracy_score(all_labels, all_preds)
+        if accuracy>best_acc:
+            best_acc = accuracy
+            best_model = i
+
+        print(f"Fold {i + 1}:Precision = {precision:.4f}, Recall = {recall:.4f}, F1-Score = {f1:.4f}, Accuracy = {accuracy:.4f}")
+
+    return best_model
+
+def predict(file_path, best_model):
+
+    model = BERTClassifier(bertmodel,  dr_rate=0.5).to(device)
+    model.load_state_dict(torch.load(PATH + f'model_state_fold{best_model}.pt'))
+
     data_list = []
     result_recipe = []
 
